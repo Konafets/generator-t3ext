@@ -1,0 +1,16 @@
+plugin.tx_<%= extkeyLowerCase %> {
+	view {
+		templateRootPath = {$plugin.tx_<%= extkeyLowerCase %>.view.templateRootPath}
+		partialRootPath = {$plugin.tx_<%= extkeyLowerCase %>.view.partialRootPath}
+		layoutRootPath = {$plugin.tx_<%= extkeyLowerCase %>.view.layoutRootPath}
+	}
+
+	persistence {
+		storagePid = {$plugin.tx_<%= extkeyLowerCase %>.persistence.storagePid}
+	}
+
+	settings {
+		listPageUid = {$plugin.tx_<%= extkeyLowerCase %>.settings.listPageUid}
+		detailPageUid = {$plugin.tx_<%= extkeyLowerCase %>.settings.detailPageUid}
+	}
+}

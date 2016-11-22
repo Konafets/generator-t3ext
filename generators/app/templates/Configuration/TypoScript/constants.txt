@@ -1,0 +1,22 @@
+plugin.tx_<%= extkeyLowerCase %> {
+	view {
+		# cat=plugin.tx_<%= extkeyLowerCase %>/file; type=string; label=Path to template root (FE)
+		templateRootPath = EXT:<%= extkey %>/Resources/Private/Templates/
+		# cat=plugin.tx_<%= extkeyLowerCase %>/file; type=string; label=Path to template partials (FE)
+		partialRootPath = EXT:<%= extkey %>/Resources/Private/Partials/
+		# cat=plugin.tx_<%= extkeyLowerCase %>/file; type=string; label=Path to template layouts (FE)
+		layoutRootPath = EXT:<%= extkey %>/Resources/Private/Layouts/
+	}
+
+	persistence {
+		# cat=plugin.tx_<%= extkeyLowerCase %>//a; type=string; label=Default storage PID
+		storagePid =
+	}
+
+	settings {
+		# cat=plugin.tx_<%= extkeyLowerCase %>/page/links; type=int+; label=List page PID
+		listPageUid =
+		# cat=plugin.tx_<%= extkeyLowerCase %>/page/links; type=int+; label=Detail page PID
+		detailPageUid =
+	}
+}
