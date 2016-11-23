@@ -6,10 +6,10 @@ $ll = 'LLL:EXT:<%= extkey %>/Resources/Private/Language/locallang.xlf:';
 $TCA['tx_<%= extkeyLowerCase %>_domain_model_<%= modelNameLowerCase %>'] = [
     'ctrl' => $TCA['tx_<%= extkeyLowerCase %>_domain_model_<%= modelNameLowerCase %>']['ctrl'],
     'interface' => [
-        'showRecordFieldList' => 'sys_language_uid, l10n_parent, l10n_diffsource, hidden, title',
+        'showRecordFieldList' => 'sys_language_uid, l10n_parent, l10n_diffsource, hidden<%= tcaFields %>',
     ],
     'types' => [
-        '1' => ['showitem' => 'sys_language_uid;;;;1-1-1, l10n_parent, l10n_diffsource, hidden;;1, title,--div--;LLL:EXT:cms/locallang_ttc.xlf:tabs.access'],
+        '1' => ['showitem' => 'sys_language_uid;;;;1-1-1, l10n_parent, l10n_diffsource, hidden<%= tcaFields %>;;1, title,--div--;LLL:EXT:cms/locallang_ttc.xlf:tabs.access'],
     ],
     'palettes' => [
         '1' => ['showitem' => ''],

@@ -10,6 +10,11 @@ String.prototype.ucfirst = function () {
 String.prototype.lcfirst = function () {
     return this.charAt(0).toLowerCase() + this.substr(1);
 };
+String.prototype.snakeCase = function () {
+    return this.replace(/([A-Z])/g, function($1) {
+        return "_" + $1.toLowerCase();
+    });
+};
 
 module.exports = yeoman.Base.extend({
     constructor: function() {
@@ -47,6 +52,7 @@ module.exports = yeoman.Base.extend({
                 this.authorCompany = configFile.meta.authors[0].company;
                 this.initGit = configFile.meta.initGit;
                 this.initGitFlow = configFile.meta.initGitFlow;
+                this.addSettingsService = configFile.meta.addSettingsService;
 
                 // Models
                 this.modelName = configFile.models[0].name;
@@ -56,6 +62,7 @@ module.exports = yeoman.Base.extend({
 
                 // SQL
                 this.fields = '';
+                this.fieldsTca = '';
 
                 for (i = 0; i < modelProperties.length; i++) {
                     var propertyName = modelProperties[i].name;
@@ -67,7 +74,8 @@ module.exports = yeoman.Base.extend({
                     property['propertyUcFirst'] = propertyName.ucfirst();
                     this.modelProperties.push(property);
 
-                    this.fields += '  ' + propertyName;
+                    this.fields += '  ' + propertyName.snakeCase();
+                    this.fieldsTca += ', ' + propertyName.snakeCase();
 
                     switch (type) {
                         case 'int':
@@ -99,10 +107,14 @@ module.exports = yeoman.Base.extend({
                     this.controllerActions.push(action);
                 }
 
-                this.log(this.fields[2]);
-
                 // Services
-                    //TODO: Get services
+                this.services = [];
+                configFile.services.forEach(function(service) {
+                    this.services.push(service)
+                }, this);
+
+                this.log(this.services);
+
 
                 // Repositories
                 this.repositoryName = this.modelName + 'Repository';
@@ -224,7 +236,7 @@ module.exports = yeoman.Base.extend({
             this.templatePath('ext_localconf.php'),
             this.destinationPath('ext_localconf.php'),
             {
-                controllerName: this.controllerName
+                controllerName: this.controllerName.replace('Controller', '')
             }
         );
         this.fs.copyTpl(
@@ -280,6 +292,29 @@ module.exports = yeoman.Base.extend({
                 authorMail: this.authorMail
             }
         );
+        this.services.forEach(function(service) {
+            this.fs.copyTpl(
+                this.templatePath('Classes/Service/DefaultService.php'),
+                this.destinationPath('Classes/Service/' + service.name +'.php'),
+                {
+                    extKeyForNamespace: this.extKeyForNamespace,
+                    authorName: this.authorName,
+                    authorMail: this.authorMail,
+                    serviceName: service.name,
+                    serviceMethods: service.methods
+                }
+            );
+        }, this);
+
+        if (this.addSettingsService) {
+            this.fs.copyTpl(
+                this.templatePath('Classes/Service/SettingsService.php'),
+                this.destinationPath('Classes/Service/SettingsService.php'),
+                {
+                    extKeyForNamespace: this.extKeyForNamespace
+                }
+            );
+        }
         this.fs.copyTpl(
             this.templatePath('Configuration/FlexForms/Flexform_plugin.xml'),
             this.destinationPath('Configuration/FlexForms/Flexform_plugin.xml'),
@@ -293,7 +328,8 @@ module.exports = yeoman.Base.extend({
             {
                 extkey: this.extKey,
                 extkeyLowerCase: this.extkeyLowerCase,
-                modelNameLowerCase: this.modelNameLowerCase
+                modelNameLowerCase: this.modelNameLowerCase,
+                tcaFields: this.fieldsTca
             }
         );
         this.fs.copyTpl(
