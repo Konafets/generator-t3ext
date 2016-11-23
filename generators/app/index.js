@@ -19,84 +19,173 @@ module.exports = yeoman.Base.extend({
     },
 
     initializing: {
-        method: function() {
+        sayHello: function() {
             this.log(yosay('Lets get some shit done'));
             this.log('initializing - Your initialization methods (checking current project state, getting configs, etc)')
+        },
+        readConfig: function () {
+            this.configFileExists = this.fs.exists(this.destinationPath('genconf.json'));
+            if (this.configFileExists) {
+                var i;
+                var configFile = this.fs.readJSON(this.destinationPath('genconf.json'));
+                // Get the values from the config file
+
+                // General data
+                this.extKey = this.appname; // take the extkey from the current folder name
+                this.extKeyForNamespace = this.extKey.replace(/_\w/g, function (matches) {
+                    return matches[1].toUpperCase();
+                }).ucfirst();
+                this.extkeyLowerCase = this.extKey.replace(/_/g, '');
+
+                this.isoDate = new Date().toISOString();
+
+                // From the meta data
+                this.title = configFile.meta.title;
+                this.description = configFile.meta.description;
+                this.authorName = configFile.meta.authors[0].name;
+                this.authorMail = configFile.meta.authors[0].email;
+                this.authorCompany = configFile.meta.authors[0].company;
+                this.initGit = configFile.meta.initGit;
+                this.initGitFlow = configFile.meta.initGitFlow;
+
+                // Models
+                this.modelName = configFile.models[0].name;
+                this.modelNameLowerCase = this.modelName.toLowerCase();
+                var modelProperties = configFile.models[0].properties;
+                this.modelProperties = [];
+
+                // SQL
+                this.fields = '';
+
+                for (i = 0; i < modelProperties.length; i++) {
+                    var propertyName = modelProperties[i].name;
+                    var type = modelProperties[i].type;
+
+                    var property = [];
+                    property['type'] = type;
+                    property['property'] = propertyName;
+                    property['propertyUcFirst'] = propertyName.ucfirst();
+                    this.modelProperties.push(property);
+
+                    this.fields += '  ' + propertyName;
+
+                    switch (type) {
+                        case 'int':
+                            this.fields += " int(11) DEFAULT '0' NOT NULL,\n";
+                            break;
+                        case 'string':
+                            this.fields += " varchar(255) DEFAULT '' NOT NULL,\n";
+                            break;
+                    }
+                }
+
+                // Controllers
+                this.controllerName = configFile.controllers[0].name;
+                if (this.controllerName.includes('Controller') == false) {
+                    this.controllerName = this.controllerName + 'Controller';
+                }
+
+                var controllerActions = configFile.controllers[0].actions;
+
+                this.controllerActions = [];
+                for (i = 0; i < controllerActions.length; i++) {
+                    var actionName = controllerActions[i].name;
+                    if (actionName.includes('Action') == false) {
+                        actionName += 'Action';
+                    }
+                    var action = [];
+                    action['name'] = actionName;
+                    action['nameUcFirst'] = actionName.ucfirst();
+                    this.controllerActions.push(action);
+                }
+
+                this.log(this.fields[2]);
+
+                // Services
+                    //TODO: Get services
+
+                // Repositories
+                this.repositoryName = this.modelName + 'Repository';
+                this.repositoryNameLcFirst = this.repositoryName.lcfirst();
+                    //TODO: Get extra repositories
+            }
         }
     },
     prompting: function() {
-        return this.prompt([{
-            type: 'input',
-            name: 'extkey',
-            message: 'Your extension key',
-            default: this.appname // default to current folder name
-        }, {
-            type: 'input',
-            name: 'title',
-            message: 'The title of the extension'
-        }, {
-            type: 'input',
-            name: 'description',
-            message: 'A description of the extension'
-        }, {
-            type: 'input',
-            name: 'authorName',
-            message: 'The name of the extension author',
-            store: true
-        }, {
-            type: 'input',
-            name: 'authorMail',
-            message: 'The email of the extension author',
-            store: true
-        }, {
-            type: 'input',
-            name: 'authorCompany',
-            message: 'The company name of the extension author',
-            store: true
-        }, {
-            type: 'input',
-            name: 'controllerName',
-            message: 'Enter a name for the first controller'
-        }, {
-            type: 'input',
-            name: 'modelName',
-            message: 'Enter a name for the first model'
-        }, {
-            type: 'confirm',
-            name: 'initGit',
-            message: 'Should I initialize an empty git repo?',
-            store: true
-        }, {
-            type: 'confirm',
-            name: 'initGitFlow',
-            message: '... and Git Flow too?',
-            store: true
-        }]).then(function(answers) {
-            this.extKey = answers.extkey;
-            this.title = answers.title;
-            this.description = answers.description;
-            this.authorName = answers.authorName;
-            this.authorMail = answers.authorMail;
-            this.authorCompany = answers.authorCompany;
+        if (this.configFileExists == false) {
+            return this.prompt([{
+                type: 'input',
+                name: 'extkey',
+                message: 'Your extension key',
+                default: this.appname // default to current folder name
+            }, {
+                type: 'input',
+                name: 'title',
+                message: 'The title of the extension'
+            }, {
+                type: 'input',
+                name: 'description',
+                message: 'A description of the extension'
+            }, {
+                type: 'input',
+                name: 'authorName',
+                message: 'The name of the extension author',
+                store: true
+            }, {
+                type: 'input',
+                name: 'authorMail',
+                message: 'The email of the extension author',
+                store: true
+            }, {
+                type: 'input',
+                name: 'authorCompany',
+                message: 'The company name of the extension author',
+                store: true
+            }, {
+                type: 'input',
+                name: 'controllerName',
+                message: 'Enter a name for the first controller'
+            }, {
+                type: 'input',
+                name: 'modelName',
+                message: 'Enter a name for the first model'
+            }, {
+                type: 'confirm',
+                name: 'initGit',
+                message: 'Should I initialize an empty git repo?',
+                store: true
+            }, {
+                type: 'confirm',
+                name: 'initGitFlow',
+                message: '... and Git Flow too?',
+                store: true
+            }]).then(function(answers) {
+                this.extKey = answers.extkey;
+                this.title = answers.title;
+                this.description = answers.description;
+                this.authorName = answers.authorName;
+                this.authorMail = answers.authorMail;
+                this.authorCompany = answers.authorCompany;
 
-            if (answers.controllerName.includes('Controller') == false) {
-                this.controllerName = answers.controllerName + 'Controller';
-            } else {
-                this.controllerName = answers.controllerName;
-            }
+                if (answers.controllerName.includes('Controller') == false) {
+                    this.controllerName = answers.controllerName + 'Controller';
+                } else {
+                    this.controllerName = answers.controllerName;
+                }
 
-            this.extKeyForNamespace = this.extKey.replace(/_\w/g, function (matches) {
-                return matches[1].toUpperCase();
-            }).ucfirst();
-            this.extkeyLowerCase = this.extKey.replace(/_/g, '');
-            this.modelName = answers.modelName;
-            this.modelNameLowerCase = this.modelName.toLowerCase();
-            this.repositoryName = this.modelName + 'Repository';
-            this.repositoryNameLcFirst = this.repositoryName.lcfirst();
-            this.isoDate = new Date().toISOString();
-            this.initGit = answers.initGit;
-            this.initGitFlow = answers.initGitFlow;
-        }.bind(this));
+                this.extKeyForNamespace = this.extKey.replace(/_\w/g, function (matches) {
+                    return matches[1].toUpperCase();
+                }).ucfirst();
+                this.extkeyLowerCase = this.extKey.replace(/_/g, '');
+                this.modelName = answers.modelName;
+                this.modelNameLowerCase = this.modelName.toLowerCase();
+                this.repositoryName = this.modelName + 'Repository';
+                this.repositoryNameLcFirst = this.repositoryName.lcfirst();
+                this.isoDate = new Date().toISOString();
+                this.initGit = answers.initGit;
+                this.initGitFlow = answers.initGitFlow;
+            }.bind(this));
+        }
     },
     configuring: {
         method: function() {
@@ -153,7 +242,8 @@ module.exports = yeoman.Base.extend({
             this.destinationPath('ext_tables.sql'),
             {
                 extkeyLowerCase: this.extkeyLowerCase,
-                modelNameLowerCase: this.modelNameLowerCase
+                modelNameLowerCase: this.modelNameLowerCase,
+                fields: this.fields
             }
         );
         this.fs.copyTpl(
@@ -165,7 +255,8 @@ module.exports = yeoman.Base.extend({
                 repositoryName: this.repositoryName,
                 repositoryNameLcFirst: this.repositoryNameLcFirst,
                 authorName: this.authorName,
-                authorMail: this.authorMail
+                authorMail: this.authorMail,
+                controllerActions: this.controllerActions
             }
         );
         this.fs.copyTpl(
@@ -175,7 +266,8 @@ module.exports = yeoman.Base.extend({
                 extKeyForNamespace: this.extKeyForNamespace,
                 modelName: this.modelName,
                 authorName: this.authorName,
-                authorMail: this.authorMail
+                authorMail: this.authorMail,
+                modelProperties: this.modelProperties
             }
         );
         this.fs.copyTpl(

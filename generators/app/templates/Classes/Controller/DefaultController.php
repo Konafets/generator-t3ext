@@ -22,27 +22,7 @@ class <%= controllerName %> extends ActionController
     {
         $this-><%= repositoryNameLcFirst %> = $<%= repositoryNameLcFirst %>;
     }
-
-
-    /**
-     * The list action
-     *
-     * @return void
-     */
-    public function listAction()
-    {
-        $this->view->assign('output', 'Hello World from the list action');
-    }
-
-
-    /**
-     * Detail action
-     *
-     * @param $id
-     * @return void
-     */
-    public function detailAction($id)
-    {
-        $this->view->assign('output', 'Hello World from the detail action');
-    }
+<% controllerActions.forEach(function (action) {%>
+       <%-include('action.ejs', {actionName: action.name, actionNameUcFirst: action.nameUcFirst}) %>
+<% }); %>
 }

@@ -1,0 +1,18 @@
+
+    /**
+     * @param <%= type %> $<%= property %>
+     * @return void
+     */
+    public function set<%= propertyUcFirst %>($<%= property %>)
+    {
+        $this-><%= property %> = $<%= property %>;
+    }
+
+
+    /**
+     * @return <%= type %>
+     */
+    public function get<%= propertyUcFirst %>()
+    {
+        return $this-><%= property %>;
+    }

@@ -20,23 +20,11 @@ use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
  */
 class <%= modelName %> extends AbstractEntity
 {
-    /** @var string $title */
-    protected $title;
 
-    /**
-     * @return string
-     */
-    public function getTitle()
-    {
-        return $this->title;
-    }
-
-    /**
-     * @param $title
-     * @return void
-     */
-    public function setTitle($title)
-    {
-        $this->title = $title;
-    }
+<% modelProperties.forEach(function (property) {%>
+    <%-include('properties.ejs', {type: property.type, property: property.property}) %>
+<% }); %>
+<% modelProperties.forEach(function (property) {%>
+    <%-include('methods.ejs', {type: property.type, property: property.property, propertyUcFirst: property.propertyUcFirst}) %>
+<% }); %>
 }
